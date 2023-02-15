@@ -1,13 +1,10 @@
 #!/bin/bash
-# Skamasle PHP SELECTOR for vesta
-# version = beta 0.6 Code simplified just for testing
-# From skamasle.com
-# Run at your risk.
+
 sistema=$(grep -o "[0-9]" /etc/redhat-release |head -n1)
 sklog=/var/log/skphp.log
 if [ ! -e /etc/yum.repos.d/remi.repo ]; then
-echo "I not found remi repo, stop install... "
-exit 2
+  echo "I not found remi repo, stop install... "
+  exit 2
 fi
 # fix php 8 version detection...
 vp=$(php -v |head -n1 |cut -c5)
@@ -18,35 +15,36 @@ elif [ "$vp" -eq 7 ];then
 elif [ "$vp" -eq 8 ];then
 	actual=$(php -v| head -n1 | grep --only-matching --perl-regexp "8\.\\d+")
 else
-echo "Cant get actual php version"
-echo "Run php -v and ask on forum or yo@skamasle.com"
-echo "Leaving instalation..."
-exit 4
+  echo "Cant get actual php version"
+  echo "Run php -v and ask on forum or yo@skamasle.com"
+  echo "Leaving instalation..."
+  exit 4
 fi
 
 fixit () {
-# Temporary the resource from my personal Github repo.
-curl -s https://raw.githubusercontent.com/samaphp/sk-php-selector/master/sk-php${1}-centos.sh > /usr/local/vesta/data/templates/web/httpd/sk-php${1}.sh
-if [ ! -e /usr/local/vesta/data/templates/web/httpd/sk-php${1}.stpl ]; then
-    ln -s /usr/local/vesta/data/templates/web/httpd/phpfcgid.stpl /usr/local/vesta/data/templates/web/httpd/sk-php${1}.stpl
-fi
-if [ ! -e /usr/local/vesta/data/templates/web/httpd/sk-php${1}.tpl ]; then
-    ln -s /usr/local/vesta/data/templates/web/httpd/phpfcgid.tpl /usr/local/vesta/data/templates/web/httpd/sk-php${1}.tpl 
-fi
-if [ -e /etc/opt/remi/php${1}/php.ini ] && [ ! -e /etc/php${1}.ini ]; then
-    ln -s /etc/opt/remi/php${1}/php.ini /etc/php${1}.ini
-    ln -s  /etc/opt/remi/php${1}/php.d /etc/php${1}.d
-else
-    if [ -e /opt/remi/php${1}/root/etc/php.ini ] && [ ! -e /etc/php${1}.ini ]; then
-        ln -s /etc/opt/remi/php${1}/php.ini /etc/php${1}.ini
-        ln -s  /etc/opt/remi/php${1}/php.d /etc/php${1}.d
-    fi
-fi
-chmod +x /usr/local/vesta/data/templates/web/httpd/sk-php${1}.sh
+  cp -f sk-php-centos.tmpl /usr/local/vesta/data/templates/web/httpd/sk-php${1}.sh
+  regex="s/PHP_VERSION/${1}/g"
+  sed -r "$regex" -i /usr/local/vesta/data/templates/web/httpd/sk-php${1}.sh
+  if [ ! -e /usr/local/vesta/data/templates/web/httpd/sk-php${1}.stpl ]; then
+      ln -s /usr/local/vesta/data/templates/web/httpd/phpfcgid.stpl /usr/local/vesta/data/templates/web/httpd/sk-php${1}.stpl
+  fi
+  if [ ! -e /usr/local/vesta/data/templates/web/httpd/sk-php${1}.tpl ]; then
+      ln -s /usr/local/vesta/data/templates/web/httpd/phpfcgid.tpl /usr/local/vesta/data/templates/web/httpd/sk-php${1}.tpl
+  fi
+  if [ -e /etc/opt/remi/php${1}/php.ini ] && [ ! -e /etc/php${1}.ini ]; then
+      ln -s /etc/opt/remi/php${1}/php.ini /etc/php${1}.ini
+      ln -s  /etc/opt/remi/php${1}/php.d /etc/php${1}.d
+  else
+      if [ -e /opt/remi/php${1}/root/etc/php.ini ] && [ ! -e /etc/php${1}.ini ]; then
+          ln -s /etc/opt/remi/php${1}/php.ini /etc/php${1}.ini
+          ln -s  /etc/opt/remi/php${1}/php.d /etc/php${1}.d
+      fi
+  fi
+  chmod +x /usr/local/vesta/data/templates/web/httpd/sk-php${1}.sh
 
-tput setaf 1
-echo "PHP ${ver2} Ready!"
-tput sgr0
+  tput setaf 1
+  echo "PHP ${ver2} Ready!"
+  tput sgr0
 }
 
 installit() {
@@ -76,6 +74,8 @@ tput sgr0
     installit 73 7.3
     installit 74 7.4
     installit 80 8.0
+    installit 81 8.1
+    installit 82 8.2
 }
 usage () {
 tput setaf 1
@@ -90,7 +90,7 @@ tput sgr0
 echo "bash $0 all"
 tput setaf 1
     echo "###############################################"
-	echo "Supported Versions: 54, 55, 56, 70, 71, 72, 73, 80"
+	echo "Supported Versions: 54, 55, 56, 70, 71, 72, 73, 80, 81, 82"
     echo "###############################################"
 tput sgr0
 }
@@ -119,9 +119,11 @@ tput sgr0
 			php70) installit 70 7.0 ;;
 			php71) installit 71 7.1 ;;
 			php72) installit 72 7.2 ;;
-            php73) installit 73 7.3 ;;
-            php74) installit 74 7.4 ;;
-            php80) installit 80 8.0 ;;
+      php73) installit 73 7.3 ;;
+      php74) installit 74 7.4 ;;
+      php80) installit 80 8.0 ;;
+      php81) installit 81 8.1 ;;
+      php82) installit 82 8.2 ;;
 			all) all ;;
 	  esac
 done
