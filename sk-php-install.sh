@@ -6,20 +6,6 @@ if [ ! -e /etc/yum.repos.d/remi.repo ]; then
   echo "I not found remi repo, stop install... "
   exit 2
 fi
-# fix php 8 version detection...
-vp=$(php -v |head -n1 |cut -c5)
-if [ "$vp" -eq 5 ];then
-	actual=$(php -v| head -n1 | grep --only-matching --perl-regexp "5\.\\d+")
-elif [ "$vp" -eq 7 ];then
-	actual=$(php -v| head -n1 | grep --only-matching --perl-regexp "7\.\\d+")
-elif [ "$vp" -eq 8 ];then
-	actual=$(php -v| head -n1 | grep --only-matching --perl-regexp "8\.\\d+")
-else
-  echo "Cant get actual php version"
-  echo "Run php -v and ask on forum or yo@skamasle.com"
-  echo "Leaving instalation..."
-  exit 4
-fi
 
 fixit () {
   cp -f sk-php-centos.tmpl /usr/local/vesta/data/templates/web/httpd/sk-php${1}.sh
@@ -48,18 +34,14 @@ fixit () {
 }
 
 installit() {
-ver=$1
-ver2=$2
+  ver=$1
+  ver2=$2
 
-if [ $actual = $ver2 ];then
-    echo "Skip php $ver2 actually installed"
-else
-tput setaf 2
-echo "Instaling PHP $ver2"
-yum install -y  php${ver}-php-pspell php${ver}-php-process php${ver}-php-imap php${ver}-php-xml php${ver}-php-xmlrpc php${ver}-php-pdo php${ver}-php-ldap php${ver}-php-pecl-zip php${ver}-php-common php${ver}-php-gmp php${ver}-php php${ver}-php-mysqlnd php${ver}-php-mbstring php${ver}-php-gd php${ver}-php-tidy php${ver}-php-pecl-memcache --enablerepo=remi >> $sklog
-echo "........"
-fixit $ver $ver2
-fi
+  tput setaf 2
+  echo "Instaling PHP $ver2"
+  yum install -y  php${ver}-php-pspell php${ver}-php-process php${ver}-php-imap php${ver}-php-xml php${ver}-php-xmlrpc php${ver}-php-pdo php${ver}-php-ldap php${ver}-php-pecl-zip php${ver}-php-common php${ver}-php-gmp php${ver}-php php${ver}-php-mysqlnd php${ver}-php-mbstring php${ver}-php-gd php${ver}-php-tidy php${ver}-php-pecl-memcache --enablerepo=remi >> $sklog
+  echo "........"
+  fixit $ver $ver2
 }
 all () {
 tput setaf 4
@@ -109,8 +91,6 @@ if [ -e /etc/redhat-release ];then
 			echo "##########"
 		tput sgr0
 for args in "$@" ; do
-tput setaf 2
-	echo "Actually you runing php $actual, so I will skip it"
 tput sgr0
 		case $args  in
 			php54) installit 54 5.4 ;;
